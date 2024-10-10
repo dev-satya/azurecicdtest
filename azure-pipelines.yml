@@ -1,0 +1,32 @@
+trigger:
+  branches:
+    include:
+      - main  # Define your main branch
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '16.x'  # Ensure your Node version matches your Angular version
+
+- script: |
+    npm install -g @angular/cli
+    npm install
+  displayName: 'Install dependencies'
+
+- script: |
+    ng build --prod
+  displayName: 'Build Angular app'
+
+- task: CopyFiles@2
+  inputs:
+    contents: '**/dist/**'
+    targetFolder: '$(Build.ArtifactStagingDirectory)/dist'
+  displayName: 'Copy build artifacts'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    pathToPublish: '$(Build.ArtifactStagingDirectory)/dist'
+  displayName: 'Publish build artifacts'
